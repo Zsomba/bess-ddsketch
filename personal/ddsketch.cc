@@ -27,9 +27,9 @@ static bool IsTimestamped(bess::Packet *pkt, size_t offset, uint64_t *time)
 }
 
 // Calculate the logarithm of given number in given base.
-double logn(double number, int base)
+double logn(double number, unsigned int base)
 {
-    if (number < 0 || base == 1 || base == 0)
+    if (number < 0 || base < 2)
     {
         return -1.0;
     }
