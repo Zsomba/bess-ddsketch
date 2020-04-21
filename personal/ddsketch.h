@@ -1,67 +1,65 @@
 #ifndef BESS_MODULES_DDKSKETCH_H_
 #define BESS_MODULES_DDKSKETCH_H_
 
-#include "bess/core/module.h"
-#include "bess/core/pb/module_msg.pb.h"
-#include "bess/core/utils/histogram.h"
-#include "bess/core/utils/mcslock.h"
-#include "bess/core/utils/random.h"
+#include "../module.h"
+#include "../pb/module_msg.pb.h"
+#include "../utils/mcslock.h"
+#include "../utils/random.h"
 #include <vector>
 
 /**
-    Realises the DDSketch measuring algorythm.
-*/
-class DDSketch
-{
-    class Bucket
-    {
-        /**
-            Constructs the bucket.
+ * Realises the DDSketch measuring algorythm.
+ */
+class DDSketch final: public Module {
+    public:
 
-            @param index the power of alpha which is the beginning of the interval contained
-            in the bucket
-            @param counter the number of measured values contained in the bucket when created,
-            default is 0
-        */
-        Bucket(int index, int counter = 0);
+    static const Commands cmds;
 
+    struct Bucket {
         int index;
         int counter;
 
-    public:
+        /**
+         * Constructs the bucket.
+         * @param index the power of alpha which is the beginning of the interval contained
+         * in the bucket
+         * @param counter the number of measured values contained in the bucket when created,
+         * default is 0
+         */
+        Bucket(int index, int counter = 0): index(index), counter(counter){};
 
         /**
-            Increases the counter of the bucket by the given amount.
-
-            @param amount the number to increase the counter with
-        */
-        void increaseCounter(int amount);
+         * Increases the counter of the bucket by the given amount.
+         * @param amount the number to increase the counter with
+         */
+        void increaseCounter(int amount = 1);
 
         /**
-            Returns the index of the bucket.
-
-            @return the value of index of the bucket
-        */
+         * Returns the index of the bucket.
+         * @return the value of index of the bucket
+         */
         int getIndex();
 
         /**
-            Return whether the bucket is empty.
-
-            @return true is the bucket is empty, false otherwise
-        */
+         * Return whether the bucket is empty.
+         * @return true is the bucket is empty, false otherwise
+         */
         bool isEmpty();
 
         /**
-            Return the number of values in the bucket
-
-            @return the value of counter
-        */
+         * Return the number of values in the bucket
+         * @return the value of counter
+         */
         int getCounter();
 
-    }
+    };
+
+    private:
+
     std::vector<Bucket> buckets;
-    int max_bucket_number;
     double accuracy;
+    uint max_bucket_number;
+    double lambda;
 
     /**
         Adds a new bucket to the buckets vector and returns an iterator to it.
@@ -69,18 +67,28 @@ class DDSketch
         @param index the index of the new bucket
         @return reference to the new bucket
     */
-    Bucket& addBucket(int index);
+    std::vector<Bucket>::reverse_iterator addBucket(int index, int counter_value = 0);
 
     /**
         Creates a new bucket with the counter of a soon to be deleted bucket
 
         @param index the index of the bucket to be deleted
         @param new_index the index of the new bucket
-        @return reference to the new bucket
+        @return iterator to the new bucket
     */
-    Bucket& overflowBucket(int to_delete_index, int new_index);
+    std::vector<Bucket>::reverse_iterator overflowBucket(std::vector<Bucket>::iterator to_delete, int new_index);
 
-public:
+    std::vector<Bucket>::iterator getSmallestBucket();
+
+    /**
+     * Counts the packets collected.
+     */
+    uint getPacketNumber();
+
+    public:
+
+    mcslock lock_;
+    size_t offset_;
 
     /**
         Constructs a DDSketch measuring object.
@@ -88,16 +96,22 @@ public:
         @param accuracy the accuracy of the measurement, default is 0.1
         @param max_buckets the maximum number of buckets in the vector, default is 100
     */
-    DDSketch(double accuracy = 0.1, int max_bucket_number = 100)
+    DDSketch(double accuracy = 0.1, uint max_bucket_number = 100)
+        :Module(),
+         accuracy(accuracy),
+         max_bucket_number(max_bucket_number){
+            lambda = (1 + accuracy) / (1 - accuracy);
+         }
 
     /**
-        Returns the bucket in the vector, with the corresponding bucket index.
+     * Clears the collected data.
+     */
+    CommandResponse CommandEmpty(const bess::pb::DDSketchCommandEmptyArg &arg);
 
-        @param index the bucket index
-        @return the bucket with the given bucket index, or NULL if the vector does
-        not contain a bucket with the given bucket index
-    */
-    Bucket& getBucket (int index);
+    /**
+     * Returns the status of the collected adta.
+     */
+    CommandResponse CommandGetStat(const bess::pb::DDSketchCommandGetStatArg &arg);
 
     /**
         Returns the iterator of the bucket with the corresponding bucket index.
@@ -106,7 +120,7 @@ public:
         @return the iterator of the bucket with the given bucket index, or NULL if the vector does
         not contain a bucket with the given bucket index
     */
-    Bucket& getBucketIterator (int index);
+    std::vector<Bucket>::iterator getBucket (int index);
 
     /**
         Insert the given value into its corresponding bucket.
@@ -115,6 +129,9 @@ public:
     */
     void insertValue(int value);
 
-}
+    void ProcessBatch(Context *ctx, bess::PacketBatch *batch);
+    CommandResponse Init(const bess::pb::DDSketchArg &arg);
+
+};
 
 #endif
