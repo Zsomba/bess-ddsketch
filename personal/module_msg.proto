@@ -263,39 +263,6 @@ message MeasureCommandGetSummaryResponse {
 
 
 /**
- * The Module DDSketch
- */
-message DDSketchArg {
-    double accuracy = 1;
-    uint64 max_bucket_number = 2;
-}
-
-
-/**
- * Clears the captured data.
- */
- message DDSketchCommandEmptyArg{}
-
-
-/**
- * Returns the status of the collected data.
- */
-message DDSketchCommandGetStatArg{}
-
-
-/**
- * Contains the status of the collected data.
- */
-message DDSketchCommandGetStatResponse{
-  uint64 packet_number = 1;
-  uint64 bucket_number = 2;
-  uint64 max_bucket_number = 3;
-  double accuracy = 4;
-  double lambda = 5;
-}
-
-
-/**
  * The Module DRR provides fair scheduling of flows based on a quantum which is
  * number of bytes allocated to each flow on each round of going through all flows.
  * Examples can be found [./bessctl/conf/samples/drr.bess]
@@ -1207,4 +1174,61 @@ message MplsPopArg {
  */
 message WorkerSplitArg {
   map<uint32, uint32> worker_gates = 1; // ogate -> worker mask
+}
+
+
+/**
+ * Messages for the DDSketch module
+ */
+
+
+/**
+ * The Module DDSketch
+ */
+ message DDSketchArg {
+  double accuracy = 1;
+  uint64 max_bucket_number = 2;
+}
+
+
+/**
+* Clears the captured data.
+*/
+message DDSketchCommandEmptyArg{}
+
+
+/**
+* Returns the status of the collected data.
+*/
+message DDSketchCommandGetStatArg{}
+
+
+/**
+* Contains the status of the collected data.
+*/uint64 packet_number = 1;
+uint64 bucket_number = 2;
+uint64 max_bucket_number = 3;
+double accuracy = 4;
+double lambda = 5;1;
+uint64 bucket_number = 2;
+uint64 max_bucket_number = 3;
+double accuracy = 4;
+double lambda = 5;
+}
+
+/**
+* Returns the status of the collected data.
+*/
+message DDSketchCommandGetContentArg{}
+
+
+/**
+* Contains the status of the collected data.
+*/
+message DDSketchCommandGetContentResponse{
+ message Bucket{
+   int index = 1;
+   int counter = 2;
+ }
+ repeated Bucket content = 1;
 }
