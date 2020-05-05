@@ -16,7 +16,7 @@ class DDSketch final: public Module {
     static const Commands cmds;
 
     struct Bucket {
-        int index;
+        long index;
         int counter;
 
         /**
@@ -26,7 +26,7 @@ class DDSketch final: public Module {
          * @param counter the number of measured values contained in the bucket when created,
          * default is 0
          */
-        Bucket(int index, int counter = 0): index(index), counter(counter){};
+        Bucket(long index, int counter = 0): index(index), counter(counter){};
 
         /**
          * Increases the counter of the bucket by the given amount.
@@ -38,7 +38,7 @@ class DDSketch final: public Module {
          * Returns the index of the bucket.
          * @return the value of index of the bucket
          */
-        int getIndex();
+        long getIndex();
 
         /**
          * Return whether the bucket is empty.
@@ -51,6 +51,16 @@ class DDSketch final: public Module {
          * @return the value of counter
          */
         int getCounter();
+
+        /**
+         * Makes Bucket comparison by their index
+         * @param bucket1 the bucket to compare
+         * @param bucket2 the bucket to compare to
+         * @return true if the two buckets' indexes are equal, false otherwise
+         */
+        // bool operator==(const Bucket bucket1, const Bucket bucket2);
+
+        inline bool operator==(const Bucket bucket){ return this->index == bucket.index; }
 
     };
 
@@ -67,7 +77,7 @@ class DDSketch final: public Module {
         @param index the index of the new bucket
         @return reference to the new bucket
     */
-    std::vector<Bucket>::reverse_iterator addBucket(int index, int counter_value = 0);
+    std::vector<Bucket>::iterator addBucket(long index, int counter_value = 0);
 
     /**
         Creates a new bucket with the counter of a soon to be deleted bucket
@@ -76,7 +86,7 @@ class DDSketch final: public Module {
         @param new_index the index of the new bucket
         @return iterator to the new bucket
     */
-    std::vector<Bucket>::reverse_iterator overflowBucket(std::vector<Bucket>::iterator to_delete, int new_index);
+    std::vector<Bucket>::iterator overflowBucket(std::vector<Bucket>::iterator to_delete, long new_index);
 
     std::vector<Bucket>::iterator getSmallestBucket();
 
@@ -114,13 +124,18 @@ class DDSketch final: public Module {
     CommandResponse CommandGetStat(const bess::pb::DDSketchCommandGetStatArg &arg);
 
     /**
+     * Returns the status of the collected adta.
+     */
+    CommandResponse CommandGetContent(const bess::pb::DDSketchCommandGetContentArg &arg);
+
+    /**
         Returns the iterator of the bucket with the corresponding bucket index.
 
         @param index the bucket index
         @return the iterator of the bucket with the given bucket index, or NULL if the vector does
         not contain a bucket with the given bucket index
     */
-    std::vector<Bucket>::iterator getBucket (int index);
+    std::vector<Bucket>::iterator getBucket (long index);
 
     /**
         Insert the given value into its corresponding bucket.
