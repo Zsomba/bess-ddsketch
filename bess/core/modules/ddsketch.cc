@@ -9,8 +9,6 @@
 #include "../utils/udp.h"
 #include "timestamp.h"
 #include <cmath>
-#include <iostream>
-#include <fstream>
 
 using bess::utils::Ethernet;
 using bess::utils::Ipv4;
@@ -24,11 +22,6 @@ const Commands DDSketch::cmds = {
 
 static bool IsTimestamped(bess::Packet *pkt, size_t offset, uint64_t *time) {
     auto *marker = pkt->head_data<Timestamp::MarkerType *>(offset);
-
-    std::ofstream file;
-    file.open("markers.txt", std::ios::app);
-    file << "Marker: " << *marker << "kMarker: " << Timestamp::kMarker << "\n";
-    file.close();
 
     if (*marker == Timestamp::kMarker) {
         *time = *reinterpret_cast<uint64_t *>(marker + 1);
@@ -53,11 +46,6 @@ void DDSketch::insertValue(int value) {
     value = abs(value);
 
     long index = ceil(logn(value, lambda));
-
-    std::ofstream file;
-    file.open("params.txt", std::ios::app);
-    file << "Value: " << index << "\n";
-    file.close();
 
     if (buckets.empty()) {
         addBucket(index);
@@ -227,11 +215,7 @@ void DDSketch::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
         uint64_t package_time_ns = 0;
         long diff = 1;
 
-        std::ofstream file;
-        file.open("params.txt", std::ios::app);
-
         if (IsTimestamped(batch->pkts()[i], offset, &package_time_ns)){
-            file << "Now time: " << now_ns << " Package time: " << package_time_ns << "\n";
             if (now_ns > package_time_ns){
                 diff = long(now_ns - package_time_ns);
             }
@@ -239,10 +223,6 @@ void DDSketch::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
                 continue;
             }
         }
-        
-        file << "Diff: " << diff << "\n";
-        file.close();
-
         insertValue(diff);
     }
 
