@@ -1188,6 +1188,7 @@ message WorkerSplitArg {
  message DDSketchArg {
   double accuracy = 1;
   uint64 max_bucket_number = 2;
+  uint64 offset = 3;
 }
 
 
@@ -1205,15 +1206,13 @@ message DDSketchCommandGetStatArg{}
 
 /**
 * Contains the status of the collected data.
-*/uint64 packet_number = 1;
-uint64 bucket_number = 2;
-uint64 max_bucket_number = 3;
-double accuracy = 4;
-double lambda = 5;1;
-uint64 bucket_number = 2;
-uint64 max_bucket_number = 3;
-double accuracy = 4;
-double lambda = 5;
+*/
+message DDSketchCommandGetStatResponse{
+  uint64 packet_number = 1;
+  uint64 bucket_number = 2;
+  uint64 max_bucket_number = 3;
+  double accuracy = 4;
+  double lambda = 5;
 }
 
 /**
@@ -1226,9 +1225,9 @@ message DDSketchCommandGetContentArg{}
 * Contains the status of the collected data.
 */
 message DDSketchCommandGetContentResponse{
- message Bucket{
-   int index = 1;
-   int counter = 2;
- }
- repeated Bucket content = 1;
+  message Bucket{
+    uint64 index = 1;
+    uint64 counter = 2;
+  }
+  repeated Bucket content = 1;
 }
