@@ -1,10 +1,10 @@
 #ifndef BESS_MODULES_DDKSKETCH_H_
 #define BESS_MODULES_DDKSKETCH_H_
 
-#include "../module.h"
-#include "../pb/module_msg.pb.h"
-#include "../utils/mcslock.h"
-#include "../utils/random.h"
+#include "../../core/module.h"
+#include "../../core/pb/ddsketch_msg.pb.h"
+#include "../../core/utils/mcslock.h"
+#include "../../core/utils/random.h"
 #include <vector>
 
 /**
@@ -116,17 +116,17 @@ class DDSketch final: public Module {
     /**
      * Clears the collected data.
      */
-    CommandResponse CommandEmpty(const bess::pb::DDSketchCommandEmptyArg &arg);
+    CommandResponse CommandEmpty(const ddsketch::pb::DDSketchCommandEmptyArg &arg);
 
     /**
      * Returns the status of the collected adta.
      */
-    CommandResponse CommandGetStat(const bess::pb::DDSketchCommandGetStatArg &arg);
+    CommandResponse CommandGetStat(const ddsketch::pb::DDSketchCommandGetStatArg &arg);
 
     /**
      * Returns the status of the collected adta.
      */
-    CommandResponse CommandGetContent(const bess::pb::DDSketchCommandGetContentArg &arg);
+    CommandResponse CommandGetContent(const ddsketch::pb::DDSketchCommandGetContentArg &arg);
 
     /**
         Returns the iterator of the bucket with the corresponding bucket index.
@@ -145,7 +145,7 @@ class DDSketch final: public Module {
     void insertValue(int value);
 
     void ProcessBatch(Context *ctx, bess::PacketBatch *batch);
-    CommandResponse Init(const bess::pb::DDSketchArg &arg);
+    CommandResponse Init(const ddsketch::pb::DDSketchArg &arg);
 
 };
 

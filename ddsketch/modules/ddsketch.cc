@@ -2,12 +2,12 @@
 
 #include <iterator>
 
-#include "../utils/common.h"
-#include "../utils/ether.h"
-#include "../utils/ip.h"
-#include "../utils/time.h"
-#include "../utils/udp.h"
-#include "timestamp.h"
+#include "../../core/utils/common.h"
+#include "../../core/utils/ether.h"
+#include "../../core/utils/ip.h"
+#include "../../core/utils/time.h"
+#include "../../core/utils/udp.h"
+#include "../../core/modules/timestamp.h"
 #include <cmath>
 
 using bess::utils::Ethernet;
@@ -75,15 +75,15 @@ void DDSketch::insertValue(int value) {
 }
 
 // Clears the collected data.
-CommandResponse DDSketch::CommandEmpty(const bess::pb::DDSketchCommandEmptyArg &){
+CommandResponse DDSketch::CommandEmpty(const ddsketch::pb::DDSketchCommandEmptyArg &){
     DDSketch::buckets.clear();
 
     return CommandResponse();
 }
 
 // Returns the status of the collected data.
-CommandResponse DDSketch::CommandGetStat(const bess::pb::DDSketchCommandGetStatArg &){
-    bess::pb::DDSketchCommandGetStatResponse response;
+CommandResponse DDSketch::CommandGetStat(const ddsketch::pb::DDSketchCommandGetStatArg &){
+    ddsketch::pb::DDSketchCommandGetStatResponse response;
 
     response.set_packet_number(DDSketch::getPacketNumber());
     response.set_bucket_number(buckets.size());
@@ -111,14 +111,14 @@ int DDSketch::Bucket::getCounter() {
 }
 
 // Returns the status of the collected data.
-CommandResponse DDSketch::CommandGetContent(const bess::pb::DDSketchCommandGetContentArg &){
-    bess::pb::DDSketchCommandGetContentResponse response;
+CommandResponse DDSketch::CommandGetContent(const ddsketch::pb::DDSketchCommandGetContentArg &){
+    ddsketch::pb::DDSketchCommandGetContentResponse response;
 
     // std::vector<bess::pb::DDSketchCommandGetContentResponse::Bucket> sent_buckets;
     
 
     for( std::vector<DDSketch::Bucket>::iterator i = buckets.begin(); i != buckets.end(); ++i){
-        bess::pb::DDSketchCommandGetContentResponse::Bucket* bucket = response.add_content();
+        ddsketch::pb::DDSketchCommandGetContentResponse::Bucket* bucket = response.add_content();
         bucket->set_index(i->index);
         bucket->set_counter(i->counter);
     }    
@@ -231,7 +231,7 @@ void DDSketch::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
     RunNextModule(ctx, batch);
 }
 
-CommandResponse DDSketch::Init(const bess::pb::DDSketchArg &arg){
+CommandResponse DDSketch::Init(const ddsketch::pb::DDSketchArg &arg){
     double accuracy = arg.accuracy();
     uint max_bucket_number = arg.max_bucket_number();
 
