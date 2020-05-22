@@ -126,6 +126,11 @@ class DDSketch final: public Module {
     CommandResponse CommandGetContent(const ddsketch::pb::DDSketchCommandGetContentArg &arg);
 
     /**
+     * Returns the wanted quantile.
+     */
+    CommandResponse CommandGetQuantile(const ddsketch::pb::DDSketchCommandGetQuantileArg &arg);
+
+    /**
         Returns the iterator of the bucket with the corresponding bucket index.
 
         @param index the bucket index

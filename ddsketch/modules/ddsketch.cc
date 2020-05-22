@@ -1,7 +1,7 @@
 #include "ddsketch.h"
 
 #include <iterator>
-
+#include <algorithm>
 #include "../../core/utils/common.h"
 #include "../../core/utils/ether.h"
 #include "../../core/utils/ip.h"
@@ -17,7 +17,8 @@ using bess::utils::Udp;
 const Commands DDSketch::cmds = {
     {"empty", "DDSketchCommandEmptyArg", MODULE_CMD_FUNC(&DDSketch::CommandEmpty), Command::THREAD_SAFE},
     {"get_stat", "DDSketchCommandGetStatArg", MODULE_CMD_FUNC(&DDSketch::CommandGetStat), Command::THREAD_SAFE},
-    {"get_content", "DDSketchCommandGetContentArg", MODULE_CMD_FUNC(&DDSketch::CommandGetContent), Command::THREAD_SAFE}
+    {"get_content", "DDSketchCommandGetContentArg", MODULE_CMD_FUNC(&DDSketch::CommandGetContent), Command::THREAD_SAFE},
+    {"get_quantile", "DDSketchCommandGetQuantileArg", MODULE_CMD_FUNC(&DDSketch::CommandGetQuantile), Command::THREAD_SAFE}
 };
 
 // Checks whether the packet was timestamped
@@ -40,6 +41,11 @@ inline int logn(int number, double base) {
     double power = log(number) / log(base);
 
     return int(power);
+}
+
+// Checks whether the bucket1's index is smaller then bucket2
+static bool compareBucket(DDSketch::Bucket bucket1, DDSketch::Bucket bucket2){
+    return (bucket1.getIndex() < bucket2.getIndex());
 }
 
 // Insert the given value into its corresponding bucket
@@ -115,6 +121,8 @@ int DDSketch::Bucket::getCounter() {
 CommandResponse DDSketch::CommandGetContent(const ddsketch::pb::DDSketchCommandGetContentArg &){
     ddsketch::pb::DDSketchCommandGetContentResponse response;
 
+    // Sort the buckets in assending order
+    std::sort(buckets.begin(), buckets.end(), compareBucket);
 
     for( std::vector<DDSketch::Bucket>::iterator i = buckets.begin(); i != buckets.end(); ++i){
         ddsketch::pb::DDSketchCommandGetContentResponse::Bucket* bucket = response.add_content();
@@ -251,6 +259,27 @@ std::vector<DDSketch::Bucket>::iterator DDSketch::getSmallestBucket(){
     }
 
     return smallest;
+}
+
+// Returns the wanted quantile.
+CommandResponse DDSketch::CommandGetQuantile(const ddsketch::pb::DDSketchCommandGetQuantileArg &arg){
+    ddsketch::pb::DDSketchCommandGetQuantileResponse response;
+    uint32_t quantile = arg.quantile() ? (arg.quantile() % 100) : 50;
+
+    uint32_t limit = (getPacketNumber() * quantile) / 100;
+    uint32_t count = 0;
+    int index = 0;
+
+    std::sort(buckets.begin(), buckets.end(), compareBucket);
+
+    for (std::vector<Bucket>::iterator i = buckets.begin(); (count < limit) && (i != buckets.end()); ++i){
+        count += i->getCounter();
+        index = i->getIndex();
+    }
+
+    response.set_quantile(pow(lambda, index));
+
+    return CommandSuccess(response);
 }
 
 ADD_MODULE(DDSketch, "ddsketch", "Measures package jitter with DDSKetch algorithm")

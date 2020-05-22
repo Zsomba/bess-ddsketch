@@ -86,3 +86,19 @@ message DDSketchCommandGetContentResponse{
   }
   repeated Bucket content = 1;
 }
+
+
+/**
+* Returns the wanted quantile.
+*/
+message DDSketchCommandGetQuantileArg{
+  uint32 quantile = 1;
+}
+
+
+/**
+* Contains the wanted quantile.
+*/
+message DDSketchCommandGetQuantileResponse{
+  uint32 quantile = 1;
+}
