@@ -55,11 +55,8 @@ class DDSketch final: public Module {
         /**
          * Makes Bucket comparison by their index
          * @param bucket1 the bucket to compare
-         * @param bucket2 the bucket to compare to
          * @return true if the two buckets' indexes are equal, false otherwise
-         */
-        // bool operator==(const Bucket bucket1, const Bucket bucket2);
-
+         */;
         inline bool operator==(const Bucket bucket){ return this->index == bucket.index; }
 
     };
@@ -106,11 +103,11 @@ class DDSketch final: public Module {
         @param accuracy the accuracy of the measurement, default is 0.1
         @param max_buckets the maximum number of buckets in the vector, default is 100
     */
-    DDSketch(double accuracy = 0.1, uint max_bucket_number = 100)
+    DDSketch()
         :Module(),
-         accuracy(accuracy),
-         max_bucket_number(max_bucket_number){
-            lambda = (1 + accuracy) / (1 - accuracy);
+         accuracy(),
+         max_bucket_number(){
+             max_allowed_workers_ = Worker::kMaxWorkers;
          }
 
     /**

@@ -20,6 +20,7 @@ const Commands DDSketch::cmds = {
     {"get_content", "DDSketchCommandGetContentArg", MODULE_CMD_FUNC(&DDSketch::CommandGetContent), Command::THREAD_SAFE}
 };
 
+// Checks whether the packet was timestamped
 static bool IsTimestamped(bess::Packet *pkt, size_t offset, uint64_t *time) {
     auto *marker = pkt->head_data<Timestamp::MarkerType *>(offset);
 
@@ -31,9 +32,9 @@ static bool IsTimestamped(bess::Packet *pkt, size_t offset, uint64_t *time) {
 }
 
 // Calculate the logarithm with given number and base.
-int logn(int number, double base) {
+inline int logn(int number, double base) {
     if (number < 0 || base == 1 || base == 0) {
-        return -1.0;                                // exception?
+        return -1.0;
     }
 
     double power = log(number) / log(base);
@@ -114,8 +115,6 @@ int DDSketch::Bucket::getCounter() {
 CommandResponse DDSketch::CommandGetContent(const ddsketch::pb::DDSketchCommandGetContentArg &){
     ddsketch::pb::DDSketchCommandGetContentResponse response;
 
-    // std::vector<bess::pb::DDSketchCommandGetContentResponse::Bucket> sent_buckets;
-    
 
     for( std::vector<DDSketch::Bucket>::iterator i = buckets.begin(); i != buckets.end(); ++i){
         ddsketch::pb::DDSketchCommandGetContentResponse::Bucket* bucket = response.add_content();
@@ -146,12 +145,6 @@ bool DDSketch::Bucket::isEmpty(){
 
     return false;
 }
-
-//Makes Bucket comparison by their index
-/*bool operator==(const DDSketch::Bucket bucket1, const DDSketch::Bucket bucket2)
-{
-    return bucket1.index == bucket2.index;
-}*/
 
 //Adds a bucket with the given bucket index to the vector and returns its iterator.
 std::vector<DDSketch::Bucket>::iterator DDSketch::addBucket(long index, int counter_value) {
@@ -232,22 +225,13 @@ void DDSketch::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
 }
 
 CommandResponse DDSketch::Init(const ddsketch::pb::DDSketchArg &arg){
-    double accuracy = arg.accuracy();
-    uint max_bucket_number = arg.max_bucket_number();
+    accuracy = arg.accuracy() ? arg.accuracy() : 0.5;
 
-    if (accuracy == 0){
-        accuracy = 0.1;
-    }
-    if (max_bucket_number == 0){
-        max_bucket_number = 100;
-    }
+    lambda = (1 + accuracy) / (1 - accuracy);
 
-    if (arg.offset()) {
-        offset_ = arg.offset();
-    } 
-    else {
-         offset_ = sizeof(Ethernet) + sizeof(Ipv4) + sizeof(Udp);
-    }
+    max_bucket_number = arg.max_bucket_number() ? arg.max_bucket_number() : 100;
+
+    offset_ = sizeof(Ethernet) + sizeof(Ipv4) + sizeof(Udp);
 
     mcs_lock_init(&lock_);
 
