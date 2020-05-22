@@ -3,6 +3,10 @@
 The DDSketch Measure Module is a modification of the core Measure Module of BESS. It uses the DDSketch algorythm to store and evaluate collected data of packets.
 This module measures the packets' delay and the jitter of the communication.
 
+This package includes two random delay generator modules too.
+Uniform Bypass generates delay in seconds from a given interval with equal possibility.
+Gaussian Bypass generates delay in seconds with natural distribution with the given mean and deveation.
+
 ## Installing into BESS
 
 To be able to use the module the following steps must be followd:
