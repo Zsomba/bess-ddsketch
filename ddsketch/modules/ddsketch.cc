@@ -49,10 +49,10 @@ static bool compareBucket(DDSketch::Bucket bucket1, DDSketch::Bucket bucket2){
 }
 
 // Insert the given value into its corresponding bucket
-void DDSketch::insertValue(int value) {
+void DDSketch::insertValue(long value) {
     value = abs(value);
 
-    long index = ceil(logn(value, lambda));
+    uint64_t index = ceil(logn(value, lambda));
 
     if (buckets.empty()) {
         addBucket(index);
@@ -141,7 +141,7 @@ void DDSketch::Bucket::increaseCounter(int amount){
 }
 
 // Returns the index of the bucket
-long DDSketch::Bucket::getIndex(){
+uint64_t DDSketch::Bucket::getIndex(){
     return index;
 }
 
@@ -155,7 +155,7 @@ bool DDSketch::Bucket::isEmpty(){
 }
 
 //Adds a bucket with the given bucket index to the vector and returns its iterator.
-std::vector<DDSketch::Bucket>::iterator DDSketch::addBucket(long index, int counter_value) {
+std::vector<DDSketch::Bucket>::iterator DDSketch::addBucket(uint64_t index, int counter_value) {
     DDSketch::Bucket* new_bucket = new DDSketch::Bucket(index, counter_value);
     DDSketch::buckets.push_back(*new_bucket);
 
@@ -174,7 +174,7 @@ std::vector<DDSketch::Bucket>::iterator DDSketch::addBucket(long index, int coun
 }
 
 // Creates a new bucket with the value of a soon to be deleted one
-std::vector<DDSketch::Bucket>::iterator DDSketch::overflowBucket(std::vector<DDSketch::Bucket>::iterator to_delete, long new_index) {
+std::vector<DDSketch::Bucket>::iterator DDSketch::overflowBucket(std::vector<DDSketch::Bucket>::iterator to_delete, uint64_t new_index) {
     int starting_value;
 
     if (to_delete == buckets.end()) {
@@ -193,7 +193,7 @@ std::vector<DDSketch::Bucket>::iterator DDSketch::overflowBucket(std::vector<DDS
 }
 
 // Returns the iterator of the bucket with the given bucket index, the end of the list if not found.
-std::vector<DDSketch::Bucket>::iterator DDSketch::getBucket (long index) {
+std::vector<DDSketch::Bucket>::iterator DDSketch::getBucket (uint64_t index) {
     for (std::vector<DDSketch::Bucket>::iterator i = buckets.begin(); i != buckets.end(); ++i) {
         if (i->getIndex() == index) {
             return i;
@@ -214,17 +214,17 @@ void DDSketch::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
 
     for (int i = 0; i < package_count; ++i){
         uint64_t package_time_ns = 0;
-        long diff = 1;
+        uint64_t diff = 1;
 
         if (IsTimestamped(batch->pkts()[i], offset, &package_time_ns)){
             if (now_ns > package_time_ns){
-                diff = long(now_ns - package_time_ns);
+                diff = now_ns - package_time_ns;
             }
             else{
                 continue;
             }
         }
-        insertValue(diff);
+        insertValue((long)diff);
     }
 
     mcs_unlock(&lock_, &mynode);

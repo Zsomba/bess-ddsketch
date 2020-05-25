@@ -16,7 +16,7 @@ class DDSketch final: public Module {
     static const Commands cmds;
 
     struct Bucket {
-        long index;
+        uint64_t index;
         int counter;
 
         /**
@@ -26,7 +26,7 @@ class DDSketch final: public Module {
          * @param counter the number of measured values contained in the bucket when created,
          * default is 0
          */
-        Bucket(long index, int counter = 0): index(index), counter(counter){};
+        Bucket(uint64_t index, int counter = 0): index(index), counter(counter){};
 
         /**
          * Increases the counter of the bucket by the given amount.
@@ -38,7 +38,7 @@ class DDSketch final: public Module {
          * Returns the index of the bucket.
          * @return the value of index of the bucket
          */
-        long getIndex();
+        uint64_t getIndex();
 
         /**
          * Return whether the bucket is empty.
@@ -74,7 +74,7 @@ class DDSketch final: public Module {
         @param index the index of the new bucket
         @return reference to the new bucket
     */
-    std::vector<Bucket>::iterator addBucket(long index, int counter_value = 0);
+    std::vector<Bucket>::iterator addBucket(uint64_t index, int counter_value = 0);
 
     /**
         Creates a new bucket with the counter of a soon to be deleted bucket
@@ -83,7 +83,7 @@ class DDSketch final: public Module {
         @param new_index the index of the new bucket
         @return iterator to the new bucket
     */
-    std::vector<Bucket>::iterator overflowBucket(std::vector<Bucket>::iterator to_delete, long new_index);
+    std::vector<Bucket>::iterator overflowBucket(std::vector<Bucket>::iterator to_delete, uint64_t new_index);
 
     std::vector<Bucket>::iterator getSmallestBucket();
 
@@ -137,14 +137,14 @@ class DDSketch final: public Module {
         @return the iterator of the bucket with the given bucket index, or NULL if the vector does
         not contain a bucket with the given bucket index
     */
-    std::vector<Bucket>::iterator getBucket (long index);
+    std::vector<Bucket>::iterator getBucket (uint64_t index);
 
     /**
         Insert the given value into its corresponding bucket.
 
         @param value the value to be inserted
     */
-    void insertValue(int value);
+    void insertValue(long value);
 
     void ProcessBatch(Context *ctx, bess::PacketBatch *batch);
     CommandResponse Init(const ddsketch::pb::DDSketchArg &arg);

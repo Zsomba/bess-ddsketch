@@ -33,8 +33,11 @@ static bool IsTimestamped(bess::Packet *pkt, size_t offset, uint64_t *time) {
 CommandResponse DelayRegistry::CommandGetContent(const delay_registry::pb::DelayRegistryCommandGetContentArg &){
     delay_registry::pb::DelayRegistryCommandGetContentResponse response;
 
-    for (std::vector<uint64_t>::iterator i = registry.begin(); i != registry.end(); ++i){
-        response.add_content(*i);
+    for (std::vector<Bucket>::iterator i = registry.begin(); i != registry.end(); ++i){
+        delay_registry::pb::DelayRegistryCommandGetContentResponse::Bucket* content = response.add_content();
+
+        content->set_value(i->value);
+        content->set_count(i->count);
     }
 
     return CommandSuccess(response);
@@ -44,6 +47,24 @@ CommandResponse DelayRegistry::Init(const delay_registry::pb::DelayRegistryArg &
     offset_ = sizeof(Ethernet) + sizeof(Ipv4) + sizeof(Udp);
 
     return CommandSuccess();
+}
+
+// Inserts the prosessed value into the vector
+inline void DelayRegistry::insertValue(uint64_t value){
+    for (std::vector<Bucket>::iterator i = registry.begin(); i != registry.end(); ++i){
+        if (i->value == value){
+            ++ i->count;
+            return;
+        }
+    }
+
+    registry.push_back(Bucket(value));
+
+    return;
+}
+
+bool DelayRegistry::Bucket::operator== (Bucket b){
+    return value == b.value;
 }
 
 void DelayRegistry::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
@@ -57,10 +78,7 @@ void DelayRegistry::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
             if (now_tsc > arrive_tsc)
             {
                 uint64_t delay = now_tsc - arrive_tsc;
-                std::vector<uint64_t>::iterator position = std::find(registry.begin(), registry.end(), delay);
-                if (position == registry.end()){
-                    registry.push_back(delay);
-                }
+                insertValue(delay / (uint64_t)1000000000);
             }
         }
     }

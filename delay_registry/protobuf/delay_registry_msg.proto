@@ -43,5 +43,9 @@ message DelayRegistryCommandGetContentArg{}
  * Contains the content of the registry.
  */
 message DelayRegistryCommandGetContentResponse{
-    repeated uint64 content = 1;
+    message Bucket{
+        uint64 value = 1;
+        uint64 count = 2;
+    }
+    repeated Bucket content = 1;
 }
