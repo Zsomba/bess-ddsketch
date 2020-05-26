@@ -277,7 +277,7 @@ CommandResponse DDSketch::CommandGetQuantile(const ddsketch::pb::DDSketchCommand
         index = i->getIndex();
     }
 
-    response.set_quantile(pow(lambda, index));
+    response.set_quantile(2 * pow(lambda, index) / (lambda+1));
 
     return CommandSuccess(response);
 }
