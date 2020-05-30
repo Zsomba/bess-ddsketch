@@ -264,15 +264,16 @@ std::vector<DDSketch::Bucket>::iterator DDSketch::getSmallestBucket(){
 // Returns the wanted quantile.
 CommandResponse DDSketch::CommandGetQuantile(const ddsketch::pb::DDSketchCommandGetQuantileArg &arg){
     ddsketch::pb::DDSketchCommandGetQuantileResponse response;
-    uint32_t quantile = arg.quantile() ? (arg.quantile() % 100) : 50;
+    uint32_t quantile = arg.quantile() ? (arg.quantile() % 101) : 50;
 
     uint32_t limit = (getPacketNumber() * quantile) / 100;
     uint32_t count = 0;
-    int index = 0;
 
     std::sort(buckets.begin(), buckets.end(), compareBucket);
 
-    for (std::vector<Bucket>::iterator i = buckets.begin(); (count < limit) && (i != buckets.end()); ++i){
+    int index = buckets.begin()->index;
+
+    for (std::vector<Bucket>::iterator i = buckets.begin(); (count <= limit) && (i != buckets.end()); ++i){
         count += i->getCounter();
         index = i->getIndex();
     }
