@@ -24,3 +24,4 @@ To run it, the script has to be in bess's folder and a Pushgateway must be avail
 When the Bess daemon is running you just have to run the script from terminal.
 You can download Prometheus from https://github.com/prometheus/prometheus and the Pushgateway from https://github.com/prometheus/pushgateway.
 For Prometheus to use the Pushgateway as a source, a new target must be added to its config with the path of the Pushgateway.
+Grafana is available from https://github.com/grafana/grafana. There are also steps described on how to connect it with Prometheus.
