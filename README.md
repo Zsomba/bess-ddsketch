@@ -15,7 +15,7 @@ To be able to use the module the following steps must be followd:
 2. Copy ddsketch folder into the bess folder
 3. Build BESS specifying the inclusion of the desired plugins:
    
-    ./build.py --plugin ddsketch --plugin gaussian_bypass --plugin uniform_bypass
+    ./build.py --plugin ddsketch --plugin gaussian_bypass --plugin uniform_bypass --plugin delay_registry
     
 ## Exporting the data
 
