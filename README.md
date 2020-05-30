@@ -20,8 +20,11 @@ To be able to use the module the following steps must be followd:
 ## Exporting the data
 
 The exporter.py script is used to export the number of buckets and their content to Prometheus.
+This script needs the Prometheus Python Client installed.
+You can get that from: https://github.com/prometheus/client_python.
 To run it, the script has to be in bess's folder and a Pushgateway must be available.
 When the Bess daemon is running you just have to run the script from terminal.
+
 You can download Prometheus from https://github.com/prometheus/prometheus and the Pushgateway from https://github.com/prometheus/pushgateway.
 For Prometheus to use the Pushgateway as a source, a new target must be added to its config with the path of the Pushgateway.
 Grafana is available from https://github.com/grafana/grafana. There are also steps described on how to connect it with Prometheus.
