@@ -1,0 +1,22 @@
+import scapy.all as scapy
+
+def gen_packet(dst_ip="0.0.0.0"):
+    eth = scapy.Ether(src='02:1e:67:9f:4d:ae', dst='06:16:3e:1b:72:32')
+    ip = scapy.IP(src='1.2.3.4', dst=dst_ip)
+    udp = scapy.UDP(sport=10001, dport=10002)
+    payload = ('hello' + '0123456789' * 200)[:60-len(eth/ip/udp)]
+    pkt = eth/ip/udp/payload
+
+    return bytes(pkt)
+
+packets = [
+            gen_packet(dst_ip='172.16.100.1'),
+            gen_packet(dst_ip='0.0.0.0'),
+            gen_packet(dst_ip='216.135.20.0')
+        ]
+
+ddsketch = DDSketch(accuracy=0.1, max_bucket_number=100)
+gauss = GaussianBypass(mean=1000, deviation=100)
+
+
+Source() -> Rewrite(templates=packets) -> Timestamp() -> gauss -> ddsketch -> Sink()

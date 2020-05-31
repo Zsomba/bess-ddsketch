@@ -8,7 +8,7 @@
 #include <vector>
 
 /**
- * Realises the DDSketch measuring algorythm.
+ * Realises the DDSketch measuring algorithm.
  */
 class DDSketch final: public Module {
     public:

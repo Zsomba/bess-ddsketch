@@ -14,6 +14,12 @@ from pybess import bess
 
 
 def get_content(module_name, metric):
+    """
+    Exports the content of the DDSketch instance
+    :param module_name: the name of the DDSketch instance
+    :param metric: the metric to store the data
+    :return: None
+    """
     buckets = runtime.run_module_command(
         module_name,
         'get_content',
@@ -26,6 +32,12 @@ def get_content(module_name, metric):
 
 
 def check_bucket_count(module_name, counter):
+    """
+    Exports the number of buckets of the DDSketch instance
+    :param module_name: the name of the DDSketch instance
+    :param counter: the metric to store the data
+    :return: None
+    """
     stats = runtime.run_module_command(
         module_name,
         'get_stat',
@@ -54,9 +66,21 @@ if __name__ == '__main__':
         raise Exception("There is no DDSketch module in the pipeline.")
 
     registry = CollectorRegistry()
-    buckets = Gauge('ddsketch_buckets', "The content of the DDSketch's buckets", ['bucket_index'], registry=registry)
-    bucket_number = Gauge('ddsketch_bucket_count', "The number of buckets currently in use by DDSketch", registry=registry)
+    buckets = Gauge(
+        'ddsketch_buckets',
+        "The content of the DDSketch's buckets",
+        ['bucket_index'],
+        registry=registry
+    )
 
+    bucket_number = Gauge(
+        'ddsketch_bucket_count',
+        "The number of buckets currently in use by DDSketch",
+        registry=registry
+    )
+
+    # This loop collects the data from the DDSketch instance
+    # and sends to the Pushgateway in every second
     while runtime.is_connected() and not runtime.is_connection_broken():
         get_content(module_name=name, metric=buckets)
         check_bucket_count(module_name=name, counter=bucket_number)

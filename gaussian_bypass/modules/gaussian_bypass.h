@@ -19,7 +19,7 @@ class GaussianBypass final : public Module {
 
  private:
   uint32_t mean;
-  uint32_t deveation;
+  uint32_t deviation;
 
 };
 

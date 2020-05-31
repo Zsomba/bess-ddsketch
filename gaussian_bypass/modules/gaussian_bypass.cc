@@ -4,7 +4,7 @@
 
 CommandResponse GaussianBypass::Init(const gaussian_bypass::pb::GaussianBypassArg &arg){
   GaussianBypass::mean = arg.mean();
-  GaussianBypass::deveation = arg.deveation();
+  GaussianBypass::deviation = arg.deviation();
 
   return CommandSuccess();
 }
@@ -14,8 +14,6 @@ void GaussianBypass::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
     uint32_t cnt = batch->cnt();
     uint32_t delay = 0;
 
-    //std::mt19937 generator;
-    //generator.seed(std::time(0));
     std::random_device rd{};
     std::mt19937 gen{rd()};
     std::normal_distribution<> distribution(GaussianBypass::mean, GaussianBypass::deveation);
@@ -23,8 +21,6 @@ void GaussianBypass::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
     for(uint32_t i = 1; i <= cnt; ++i){
         delay += std::round(distribution(gen));
     }
-
-    //uint64_t stop_tsc = start_tsc + (uint64_t)delay;
 
     uint64_t stop_tsc = start_tsc + (uint64_t)std::round(distribution(gen));
 
@@ -35,4 +31,4 @@ void GaussianBypass::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
     RunNextModule(ctx, batch);
 }
 
-ADD_MODULE(GaussianBypass, "gaussian_bypass", "Bypasses packets with gaussian deveation random delay.")
+ADD_MODULE(GaussianBypass, "gaussian_bypass", "Bypasses packets with gaussian deviation random delay.")

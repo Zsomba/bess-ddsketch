@@ -33,11 +33,6 @@ syntax = "proto3";
 package ddsketch.pb;
 
 /**
- * Messages for the DDSketch module
- */
-
-
-/**
  * The Module DDSketch
  */
  message DDSketchArg {

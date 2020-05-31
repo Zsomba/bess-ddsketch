@@ -283,5 +283,5 @@ CommandResponse DDSketch::CommandGetQuantile(const ddsketch::pb::DDSketchCommand
     return CommandSuccess(response);
 }
 
-ADD_MODULE(DDSketch, "ddsketch", "Measures package jitter with DDSKetch algorithm")
+ADD_MODULE(DDSketch, "ddsketch", "Measures package delay with DDSKetch algorithm")
 

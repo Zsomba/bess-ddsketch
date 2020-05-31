@@ -34,5 +34,5 @@ package gaussian_bypass.pb;
 
 message GaussianBypassArg {
     uint32 mean = 1;
-    uint32 deveation = 2;
+    uint32 deviation = 2;
 }

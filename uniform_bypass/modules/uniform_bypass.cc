@@ -31,4 +31,4 @@ void UniformBypass::ProcessBatch(Context *ctx, bess::PacketBatch *batch){
     RunNextModule(ctx, batch);
 }
 
-ADD_MODULE(UniformBypass, "uniform_bypass", "Bypasses packets with uniform deveation random delay.")
+ADD_MODULE(UniformBypass, "uniform_bypass", "Bypasses packets with uniform deviation random delay.")
